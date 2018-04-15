@@ -144,7 +144,8 @@ model.fit(x, y,
         )
 '''
 model.save('/home/u/b03201003/data/stock.h5')
- predict=model.predict(x_p[0][np.newaxis,:,:])
+
+predict=model.predict(x_p[0][np.newaxis,:,:])
 for i in range(1,x_p.shape[0]):
     predict=np.concatenate((predict,model.predict(x_p[i][np.newaxis,:,:])),axis=0)
 
@@ -156,22 +157,9 @@ for i in range(0,y_p.shape[1]):
     for j in range(0,y_p.shape[0]):
         y_p[j][i]=(y_p[j][i]+d[i])*c[i]
 
-data = pd.read_csv('C:\\data5\\newpp.csv')
-#C:\\data5\\newpp.csv
-#/home/u/b03201003/newpp.csv
-data=data.iloc[:,1:]
-
-data=data.values
-
-for i in range(0,predict.shape[1]):
-    predict[-i-1]=data[-i-2][4]*predict[-i-1]
-    y_p[-i-1]=data[-i-1]
-
 import matplotlib.pyplot as plt
-p=range(0,predict.shape[0])
-plt.plot(p, predict[:,3], label="pre", color="red", linewidth=2)
-plt.plot(p, y_p[:,3], "b--", label="y")
+p=range(0,len(predict[:,0]))
+plt.plot(p, predict[:,0], label="pre", color="red", linewidth=0.1)
+plt.plot(p, y_p[:,0], "b--", label="y",linewidth=0.1)
 plt.show()
-
-print(predict)
-print(y8)
+#報酬率
