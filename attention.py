@@ -38,21 +38,18 @@ for i in range(data.shape[0] - TIME_STEPS ):
 reshaped_data = np.array(dat).astype('float64')
 reshaped_data=reshaped_data
 
-x = reshaped_data[:-1,:,:]
-y = reshaped_data[1:,-1,1:5 ]
+x_p= reshaped_data[:-1,:,21:25]
+y_p= reshaped_data[1:,-1,4]
+y_p=np.reshape(y_p,[-1,1])
 
-x1,x2,x3,x4,x5,x6,x7,x8=np.array_split(x,8,axis=0)
+x1,x2,x3,x4,x5,x6,x7,x8=np.array_split(x_p,8,axis=0)
 x=np.vstack((x1,x2,x3,x4,x5,x6,x7))
 
-xf=x.reshape(-1,x.shape[1],x.shape[2],1)
-x8f=x8.reshape(-1,x.shape[1],x.shape[2],1)
-y1,y2,y3,y4,y5,y6,y7,y8=np.array_split(y,8,axis=0)
+y1,y2,y3,y4,y5,y6,y7,y8=np.array_split(y_p,8,axis=0)
 y=np.vstack((y1,y2,y3,y4,y5,y6,y7))
 
-y=y[:,3]
-y8=y8[:,3]
-print(x.shape)
-print(y.shape)
+print(x8.shape)
+print(y8.shape)
 
 import numpy as np
 np.random.seed(1337)  # for reproducibility
@@ -135,7 +132,7 @@ model.compile(optimizer=adam,
 model.fit([x,xf], y,
     batch_size=64, epochs=3,validation_data=([x8,x8f], y8)
         )
-
+'''
 from keras.optimizers import Adam, SGD
 LR = 1e-1
 sgd=SGD(LR,clipnorm=1e-6,  decay=0, momentum=0.9, nesterov=False)
@@ -145,34 +142,36 @@ model.compile(optimizer=sgd,
 model.fit(x, y,
     batch_size=4, epochs=10,validation_data=(x8, y8)
         )
-
+'''
 model.save('/home/u/b03201003/data/stock.h5')
- 
-
-predict=model.predict(x8[0][np.newaxis,:,:])
-for i in range(1,x8.shape[0]):
-    predict=np.concatenate((predict,model.predict(x8[i][np.newaxis,:,:])),axis=0)
+ predict=model.predict(x_p[0][np.newaxis,:,:])
+for i in range(1,x_p.shape[0]):
+    predict=np.concatenate((predict,model.predict(x_p[i][np.newaxis,:,:])),axis=0)
 
 for i in range(0,predict.shape[1]):
     for j in range(0,predict.shape[0]):
         predict[j][i]=(predict[j][i]+d[i])*c[i]
 
-for i in range(0,y8.shape[1]):
-    for j in range(0,y8.shape[0]):
-        y8[j][i]=(y8[j][i]+d[i])*c[i]
+for i in range(0,y_p.shape[1]):
+    for j in range(0,y_p.shape[0]):
+        y_p[j][i]=(y_p[j][i]+d[i])*c[i]
 
+data = pd.read_csv('C:\\data5\\newpp.csv')
+#C:\\data5\\newpp.csv
+#/home/u/b03201003/newpp.csv
+data=data.iloc[:,1:]
+
+data=data.values
+
+for i in range(0,predict.shape[1]):
+    predict[-i-1]=data[-i-2][4]*predict[-i-1]
+    y_p[-i-1]=data[-i-1]
+
+import matplotlib.pyplot as plt
+p=range(0,predict.shape[0])
+plt.plot(p, predict[:,3], label="pre", color="red", linewidth=2)
+plt.plot(p, y_p[:,3], "b--", label="y")
+plt.show()
 
 print(predict)
 print(y8)
-
-evaluate( x, y )
-
-
-x8.reshape([462,83])
-y8.reshape([462,4])
-
-predict=model.predict(x8)
-import matplotlib.pyplot as plt
-p=range(0,)
-plt.plot(p, pre, label="pre", color="red", linewidth=2)
-plt.plot(p, datadiv, "b--", label="y")
